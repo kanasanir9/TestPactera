@@ -14,7 +14,7 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 
-import com.dev.pactera.Item.UNITS;
+
 
 public class ReceipeFinder {
 
@@ -63,13 +63,13 @@ public class ReceipeFinder {
 			}
 			
 		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
+			// TODO add tracing
 			new CookBookException(e.getMessage(),e.getCause());
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			// TODO add tracing
 			new CookBookException(e.getMessage(),e.getCause());
 		} catch (ParseException e) {
-			// TODO Auto-generated catch block
+			// TODO add tracing
 			new CookBookException(e.getMessage(),e.getCause());
 		}
 		
@@ -89,10 +89,14 @@ public class ReceipeFinder {
 		
 		return true;
 	}
-	private String selectReceipe(String json) 
+	private String selectReceipe(String json) throws CookBookException 
 	{
 		//TODO validate passed json
 		JSONArray receipeArray = (JSONArray) JSONValue.parse(json);
+		if(receipeArray==null)
+		{
+			throw new RuntimeException("Malformed JSON!");
+		}
 		JSONObject receipe;
 		Date minDate = null;
 		String selectedReceipe = ORDER_TAKEOUT;
@@ -106,6 +110,11 @@ public class ReceipeFinder {
 			JSONArray ingredients = (JSONArray) receipe.get(INGREDIENTS);
 			boolean foundReceipe = true;
 			minItemUseBy = null;
+			if(ingredients == null)
+				{//TODO change to debug level
+				System.out.println("Empty receipe book or invalid receipe");
+				return this.ORDER_TAKEOUT;
+				}
 			for(int j=0;j<ingredients.size();j++)
 			{
 				JSONObject itemObject = (JSONObject) ingredients.get(j);
@@ -159,16 +168,39 @@ public class ReceipeFinder {
 	public String receipeFinder(String csv,String json) 
 	{
 		try {
+			if(csv==null)
+			{   
+				//TODO change it to debug level tracing
+				System.out.println("CSV file path not passed");
+				
+				return this.ORDER_TAKEOUT;
+				
+				
+			}
 			boolean isSuccess = this.loadCSV(csv);
 			if(isSuccess)
 			{
 				return this.selectReceipe(json);
 			}
 		} catch (CookBookException e) {
-			// TODO Auto-generated catch block
+			
+			//TODO add debug trace
 			e.printStackTrace();
+			return "Error";
+			
 		}
 		
 		return null;
+	}
+	
+	public static void main(String args[])
+	{
+		if(args.length<2)
+		{
+			System.out.println("Invalid method Invocation! Please pass a csv file path and a receipe json");
+		}
+		
+		ReceipeFinder finder = new ReceipeFinder();
+		System.out.println(finder.receipeFinder(args[0], args[1]));
 	}
 }

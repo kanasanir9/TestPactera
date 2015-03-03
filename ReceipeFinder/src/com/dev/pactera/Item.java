@@ -39,7 +39,7 @@ public class Item {
 	
 	public boolean isSufficient(int amount) {
 		//TODO check for unit as well
-		return this.amount > amount;
+		return this.amount >= amount;
 		
 	}
 }

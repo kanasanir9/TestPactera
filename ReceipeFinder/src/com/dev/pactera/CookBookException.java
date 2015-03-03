@@ -10,5 +10,11 @@ public class CookBookException extends Exception {
 		this.message = message;
 		this.throwable = throwable;
 	}
+	
+	CookBookException(String message)
+	{
+		this.message = message;
+		this.throwable = new Exception(message);
+	}
 
 }
