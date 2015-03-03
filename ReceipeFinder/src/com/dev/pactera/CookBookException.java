@@ -17,4 +17,5 @@ public class CookBookException extends Exception {
 		this.throwable = new Exception(message);
 	}
 
+	
 }
