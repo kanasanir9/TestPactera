@@ -3,12 +3,16 @@ package com.test.pactera;
 import static org.junit.Assert.*;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.util.Date;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -119,13 +123,14 @@ public class ReceipeTester {
 
 	@Test
 	public void testForNonExistentItem() {
+		
+		String json2 = " [{\"name\":\"Chicken Curry\",\"ingredients\":[{\"item\":\"chicken\",\"amount\":\"1\",\"unit\":\"of\"}]}]";
+		String result = finder.receipeFinder(FILENAME, json2);
+		assertEquals(finder.ORDER_TAKEOUT, result);
 
 	}
 
-	@Test
-	public void testForMultiplePossibleItem() {
-
-	}
+	
 
 	
 
@@ -157,12 +162,23 @@ public class ReceipeTester {
 
 	@Test
 	public void testPartialMatchinReceipe() {
-
+		String json = " [{\"name\":\"omlet\",\"ingredients\":[{\"item\":\"eggs\",\"amount\":\"2\",\"unit\":\"of\"}]}]";
+		String result = finder.receipeFinder(FILENAME, json);
+		assertEquals("omlet", result);
+		//add salt to receipe
+		json = " [{\"name\":\"omlet\",\"ingredients\":[{\"item\":\"eggs\",\"amount\":\"2\",\"unit\":\"of\"},{\"item\":\"salt\",\"amount\":\"2\",\"unit\":\"grams\"}]}]";
+		result = finder.receipeFinder(FILENAME, json);
+		assertNotEquals("omlet",result);
+	
 	}
 
 	@Test
 	public void testForMatchInReceipeButPastExpiryDate() {
-
+		String json = " [{\"name\":\"fish fry\",\"ingredients\":[{\"item\":\"fish\",\"amount\":\"1\",\"unit\":\"of\"}]}]";
+		String result = finder.receipeFinder(FILENAME, json);
+		assertNotEquals("fish fry", result);
+		assertEquals(ReceipeFinder.ORDER_TAKEOUT,result);
+		
 	}
 
 	@Test
@@ -171,6 +187,29 @@ public class ReceipeTester {
 		String result = finder.receipeFinder(FILENAME, json);
 		// invalid json prints a message to sysout or traces
 		assertEquals(finder.ORDER_TAKEOUT, result);
+	}
+	
+	@Test
+	public void testBulkReceipeBook() {
+		try {
+			FileReader reader = new FileReader("test.json");
+			JSONParser parser = new JSONParser();
+			JSONArray array = (JSONArray) parser.parse(reader);
+			String jsonString = array.toJSONString();
+			String result = finder.receipeFinder(FILENAME, jsonString);
+			// invalid json prints a message to sysout or traces
+			assertEquals("Scrambled Egg", result);
+			
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (org.json.simple.parser.ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 }
