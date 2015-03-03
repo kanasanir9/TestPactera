@@ -32,5 +32,12 @@
  }
  ,
  
- 
+ {
+  "name": "Thai green Curry",
+  "ingredients": [
+   { "item":"rice", "amount":"150", "unit":"grams"},
+   { "item":"greenCurry", "amount":"50", "unit":"grams"}
+  ]
+ }
+ ,
 ]
